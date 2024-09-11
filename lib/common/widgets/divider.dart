@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/theme/palette.dart';
 
 class DividerCustom extends Divider {
   /// The lineColor to use when painting the line of [Divider]
@@ -6,6 +7,9 @@ class DividerCustom extends Divider {
   final Color? lineColor;
 
   /// Creates a customized [Divider]
-  DividerCustom({super.key, this.lineColor})
-      : super(color: lineColor ?? Colors.grey.shade300);
+  const DividerCustom({
+    super.key,
+    this.lineColor,
+    super.thickness,
+  }) : super(color: lineColor ?? Palette.secondary);
 }

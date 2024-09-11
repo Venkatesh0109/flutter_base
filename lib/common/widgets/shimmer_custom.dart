@@ -25,7 +25,7 @@ class ShimmerCustom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: Palette.muted.withOpacity(.25),
+      baseColor: Palette.muted,
       highlightColor: Colors.white,
       enabled: true,
       child: child,

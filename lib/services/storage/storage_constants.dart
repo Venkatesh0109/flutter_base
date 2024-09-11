@@ -1,5 +1,6 @@
 class StorageConstants {
-  static const String token = "access_token";
-  static const String district = "district";
-  static const String zone = "zone";
+  static const String accessToken = "ACCESS_TOKEN";
+  static const String user = "USER";
+  static const String loginCreds = "login-creds";
+  static const String languageCode = "language_code";
 }

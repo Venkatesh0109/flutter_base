@@ -1,33 +1,20 @@
 import 'package:flutter/material.dart';
-
-class TextUnerlined extends StatelessWidget {
-  final String value;
-  const TextUnerlined(
-    this.value, {
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      value,
-      style: const TextStyle(
-          decoration: TextDecoration.underline,
-          fontSize: 14,
-          fontWeight: FontWeight.w500),
-    );
-  }
-}
+import 'package:flutter_base/constants/size_unit.dart';
+import 'package:flutter_base/constants/space.dart';
+import 'package:flutter_base/theme/palette.dart';
+import 'package:flutter_base/utilities/extensions/double_extension.dart';
+import 'package:readmore/readmore.dart';
 
 class TextCustom extends StatelessWidget {
   final String value;
   final double? size;
-  final Color? color;
+  final Color? color, decorationColor;
   final FontWeight? fontWeight;
   final int? maxLines;
   final TextAlign? align;
   final TextDecoration? decoration;
   final double? height;
+  final TextOverflow? overflow;
   const TextCustom(
     this.value, {
     super.key,
@@ -38,101 +25,139 @@ class TextCustom extends StatelessWidget {
     this.align,
     this.decoration,
     this.height,
+    this.overflow,
+    this.decorationColor,
   });
-
   @override
   Widget build(BuildContext context) {
+    double fontSize = (size ?? 14).getFontSize(context);
     return Text(
       value,
-      maxLines: maxLines,
-      overflow: TextOverflow.ellipsis,
+      maxLines: maxLines ?? 10000,
+      overflow: overflow ?? TextOverflow.ellipsis,
       textAlign: align,
       style: TextStyle(
-          fontSize: size ?? 14,
+          fontSize: fontSize,
           color: color,
           fontWeight: fontWeight,
           decoration: decoration,
+          decorationColor: decorationColor,
           height: height),
     );
   }
 }
 
-class TextH1 extends StatelessWidget {
-  final String value;
-  const TextH1(
-    this.value, {
+class NameCard extends StatelessWidget {
+  const NameCard({
     super.key,
+    required this.title,
+    required this.subtitle,
+    this.subtitlecolor,
+    this.titlecolor,
+    this.crossAxisAlignment = CrossAxisAlignment.start,
+    this.titleSize,
+    this.subtitleSize,
   });
-
+  final String title;
+  final String subtitle;
+  final Color? titlecolor;
+  final Color? subtitlecolor;
+  final double? titleSize;
+  final double? subtitleSize;
+  final CrossAxisAlignment crossAxisAlignment;
   @override
   Widget build(BuildContext context) {
-    return Text(value,
-        style: const TextStyle(
-            fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: .2));
-  }
-}
-
-class TextSTD extends StatelessWidget {
-  final Color? color;
-  const TextSTD(
-    this.value, {
-    super.key,
-    this.color,
-  });
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      value,
-      style:
-          TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.normal),
+    return Column(
+      crossAxisAlignment: crossAxisAlignment,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+              fontSize: titleSize ?? 12,
+              fontWeight: FontWeight.w700,
+              color: titlecolor ?? Palette.grey),
+        ),
+        // const HeightHalf(),
+        Text(
+          maxLines: 2,
+          subtitle,
+          style: TextStyle(
+              fontSize: subtitleSize ?? 12,
+              fontWeight: FontWeight.w500,
+              color: subtitlecolor ?? Palette.grey),
+        ),
+        const HeightHalf(),
+      ],
     );
   }
 }
 
-class TextS extends StatelessWidget {
-  final String value;
+class TextColumn extends StatelessWidget {
+  const TextColumn(
+      {super.key,
+      required this.head,
+      required this.value,
+      this.color,
+      this.isStart = false,
+      this.isEnd = false});
+  final String head, value;
   final Color? color;
-  const TextS(
-    this.value, {
-    super.key,
-    this.color,
-  });
-
+  final bool isStart, isEnd;
   @override
   Widget build(BuildContext context) {
-    return Text(
-      value,
-      style: TextStyle(color: color, fontSize: 14),
-    );
-  }
-}
-
-class Heading extends StatelessWidget {
-  const Heading({
-    super.key,
-    required this.text,
-    this.moreAction,
-  });
-  final String text;
-  final VoidCallback? moreAction;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+        crossAxisAlignment: isEnd
+            ? CrossAxisAlignment.end
+            : isStart
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
         children: [
-          TextCustom(
-            text,
-            fontWeight: FontWeight.w600,
-            size: 18,
-          ),
-          InkWell(onTap: moreAction, child: const TextUnerlined("more"))
-        ],
-      ),
+          TextCustom(head, size: 11, color: Palette.grey),
+          const SizedBox(height: SizeUnit.sm / 4),
+          TextCustom(value,
+              fontWeight: FontWeight.w500,
+              size: 15,
+              color: color ?? Palette.grey)
+        ]);
+  }
+}
+
+class ReadMoreTextCustom extends StatelessWidget {
+  const ReadMoreTextCustom(this.value,
+      {super.key,
+      this.size,
+      this.color,
+      this.fontWeight,
+      this.maxLines,
+      this.align,
+      this.height,
+      this.moreFontWeight});
+  final String value;
+  final double? size;
+  final Color? color;
+  final FontWeight? fontWeight, moreFontWeight;
+  final int? maxLines;
+  final TextAlign? align;
+  final double? height;
+  @override
+  Widget build(BuildContext context) {
+    return ReadMoreText(
+      value,
+      trimExpandedText: ' less',
+      trimCollapsedText: 'more',
+      trimLines: 2,
+      trimMode: TrimMode.Line,
+      lessStyle: fontStyle(moreFontWeight: moreFontWeight),
+      moreStyle: fontStyle(moreFontWeight: moreFontWeight),
+      style: fontStyle(),
     );
   }
+
+  double get fontSize => (size ?? 14);
+
+  TextStyle fontStyle({FontWeight? moreFontWeight}) => TextStyle(
+      fontSize: fontSize,
+      color: color,
+      fontWeight: moreFontWeight ?? fontWeight,
+      height: height);
 }

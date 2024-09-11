@@ -1,25 +1,32 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_base/constants/keys.dart';
+import 'package:flutter_base/models/user.dart';
+import 'package:flutter_base/services/storage/storage_constants.dart';
 
-/// [AuthProvider] provides a state management for authentication
 class AuthProvider extends ChangeNotifier {
-  // Brearer token private member
-  String _token = "";
-
-  /// Current user's Bearer token
-  String get token => _token;
-
-  /// A setter for Current user's Bearer token
-  set token(String newToken) {
-    _token = newToken;
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+  set isLoading(bool val) {
+    _isLoading = val;
     notifyListeners();
   }
 
-  bool _isLoading = false;
+  String _accessToken = '';
+  String get accessToken => _accessToken;
+  set accessToken(String val) {
+    _accessToken = val;
+    securedStorage.write(key: StorageConstants.accessToken, value: val);
+    notifyListeners();
+  }
 
-  /// Specifies the loading status of an Authentication
-  bool get isLoading => _isLoading;
-  set isLoading(bool value) {
-    _isLoading = value;
+  User? _user;
+  User? get user => _user;
+  set user(User? user) {
+    _user = user;
+    securedStorage.write(
+        key: StorageConstants.user, value: jsonEncode(user?.toJson() ?? {}));
     notifyListeners();
   }
 }

@@ -16,22 +16,21 @@ class LoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? Stack(children: [
-            child,
-            Scaffold(
-                backgroundColor: Palette.dark.withOpacity(.25),
-                body: Center(
-                  child: Container(
-                      alignment: Alignment.center,
-                      height: 62,
-                      width: 62,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: const CircularProgressIndicator()),
-                )),
-          ])
-        : child;
+    return Stack(children: [
+      child,
+      if (isLoading)
+        Scaffold(
+            backgroundColor: Palette.dark.withOpacity(.8),
+            body: Center(
+              child: Container(
+                  alignment: Alignment.center,
+                  height: 62,
+                  width: 62,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10)),
+                  child: const CircularProgressIndicator()),
+            )),
+    ]);
   }
 }

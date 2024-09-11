@@ -1,11 +1,20 @@
-/// Important app texts
-abstract class AppStrings {
-  /// App's android [Google Play Store](https://play.google.com/store/apps/) url
-  static const String androidStoreUrl = "";
+// ignore_for_file: unused_field
 
-  /// App's Apple [App Stote](https://apps.apple.com/in/app) url
-  static const String iosStoreUrl = "";
+import 'package:flutter_base/constants/backend_urls.dart';
+
+abstract class AppStrings {
+  /// App name
+  static const String appName = "TN-EDII";
+
+  /// Target API url
+  static String targetUrl = BackEndUrls.serverUrl;
 
   /// Backend API url
-  static const String apiUrl = "";
+  static String apiUrl = "${targetUrl}api/v1/";
+
+  /// Backend storage url
+  static String imgUrl = targetUrl;
+
+  /// Playstore application url
+  static String playstoreUrl = 'https://Playstore.com';
 }

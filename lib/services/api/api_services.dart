@@ -1,99 +1,111 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'dart:convert';
-import 'dart:io';
-
+// ignore_for_file: await_only_futures, use_build_context_synchronously
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_base/constants/app_strings.dart';
 import 'package:flutter_base/constants/keys.dart';
+
+import 'package:flutter_base/models/response.dart';
 import 'package:flutter_base/providers/providers.dart';
+import 'package:flutter_base/repositories/info_repository.dart';
 import 'package:flutter_base/services/api/api_helper.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+
+options(String prefix) {
+  String url = '${AppStrings.apiUrl}$prefix';
+  if (!url.endsWith('/')) url += '/';
+  return BaseOptions(
+      baseUrl: url,
+      headers: setHeaders(),
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 20));
+}
+
+Map<String, String> setHeaders() {
+  return {
+    'AppCode': AppStrings.appName,
+    'Accept': "application/json",
+    'Authorization': "Bearer ${authProvider.accessToken}",
+  };
+}
 
 class APIService {
-  APIHelper helper = APIHelper();
-  Duration timeout = const Duration(seconds: 30);
-
-  http.Response timeoutResponse = http.Response(
-      jsonEncode({"status": "error", "message": "Request timeout"}), 408);
-
-  static const String baseURL = AppStrings.apiUrl;
-  Map<String, String> headers = {
-    "Accept": "application/json",
-    "Authorization": "Bearer ${authProvider.token}"
-  };
-
-  Future post(BuildContext context, String endPoint,
-      {required Map<String, String> body}) async {
-    http.Response response = await http
-        .post(Uri.parse(baseURL + endPoint), headers: headers, body: body)
-        .timeout(
-          timeout,
-          onTimeout: () => timeoutResponse,
-        );
-    logger.i(baseURL + endPoint);
-    logger.i(body);
-    logger.w(response.body);
-    return helper.httpErrorHandle(response: response, context: context);
+  final String prefixUrl;
+  Dio dio = Dio();
+  APIService({this.prefixUrl = ''}) {
+    dio.options = options(prefixUrl);
+    dio.interceptors.add(dioLogger);
   }
 
-  Future get(BuildContext context, String endPoint,
-      {Map<String, String>? queryParams}) async {
-    http.Response response = await http
-        .get(
-            Uri.parse(baseURL + endPoint).replace(queryParameters: queryParams),
-            headers: headers)
-        .timeout(
-          timeout,
-          onTimeout: () => timeoutResponse,
-        );
-
-    logger.i(baseURL + endPoint);
-    queryParams != null ? logger.i(queryParams) : null;
-    logger.w(response.body);
-    return helper.httpErrorHandle(response: response, context: context);
-  }
-
-  Future multipartFormDataPost(String endPoint, File? file,
-      {Map<String, String> params = const {},
-      required String filename,
-      String method = "POST"}) async {
-    Uri uri = Uri.parse("$baseURL$endPoint");
-    logger.i(uri);
-    logger.i(params);
-    http.MultipartRequest request = http.MultipartRequest(method, uri);
-    request.headers.addAll(headers);
-    request.fields.addAll(params);
-    logger.i(request.fields);
-    if (file != null) {
-      http.MultipartFile multipartFile =
-          await http.MultipartFile.fromPath(filename, file.path);
-      request.files.add(multipartFile);
-    }
-    http.StreamedResponse response = await request.send();
-    try {
-      dynamic value = await response.stream.transform(utf8.decoder).join();
-      logger.i(value);
-      value = jsonDecode(value);
-      return value;
-    } catch (e) {
-      logger.e(e);
-      return {'status': 'Failed', 'message': 'Something went wrong!'};
+// post call
+  Future<ResponseData> post(BuildContext context, String url,
+      {Map<String, dynamic> body = const {}, params}) async {
+    while (true) {
+      if (!await InfoRepository().checkInternetConnection()) {
+        // Wait for a moment before retrying
+        await Future.delayed(const Duration(seconds: 3));
+        continue; // Continue the loop to check for internet connection again
+      }
+      try {
+        var response = await dio.post(url, data: body, queryParameters: params);
+        return APIHelper().httpErrorHandle(response: response);
+      } on DioException catch (e) {
+        return APIHelper().httpErrorHandle(response: e.response);
+      }
     }
   }
 
-  bool hasError(Map responseBody) {
-    if (responseBody.isEmpty) {
-      return true;
+  //get call
+  Future get(BuildContext context, String url,
+      {Map<String, dynamic> body = const {}, params}) async {
+    while (true) {
+      if (!await InfoRepository().checkInternetConnection()) {
+        // Wait for a moment before retrying
+        await Future.delayed(const Duration(seconds: 3));
+        continue; // Continue the loop to check for internet connection again
+      }
+      try {
+        var response = await dio.get(url, data: body, queryParameters: params);
+        return APIHelper().httpErrorHandle(response: response);
+      } on DioException catch (e) {
+        return APIHelper().httpErrorHandle(response: e.response);
+      }
     }
-    bool hasStatus = responseBody.keys.any((key) => key == "status");
-    if (!hasStatus) {
-      return false;
-    } else {
-      if (responseBody["status"] == "error") {
-        return true;
-      } else {
-        return false;
+  }
+
+  // put call
+  Future put(BuildContext context, String url,
+      {body, params, cusUrl, bool isAuth = false}) async {
+    while (true) {
+      if (!await InfoRepository().checkInternetConnection()) {
+        // Wait for a moment before retrying
+        await Future.delayed(const Duration(seconds: 3));
+        continue; // Continue the loop to check for internet connection again
+      }
+      try {
+        var response = await dio.put(url, data: body, queryParameters: params);
+        return APIHelper().httpErrorHandle(response: response);
+      } on DioException catch (e) {
+        if (e.response == null) return;
+        return APIHelper().httpErrorHandle(response: e.response);
+      }
+    }
+  }
+
+  //delete call
+  Future delete(BuildContext context, String url,
+      {body, params, bool isAuth = false}) async {
+    while (true) {
+      if (!await InfoRepository().checkInternetConnection()) {
+        // Wait for a moment before retrying
+        await Future.delayed(const Duration(seconds: 3));
+        continue; // Continue the loop to check for internet connection again
+      }
+      try {
+        var response =
+            await dio.delete(url, data: body, queryParameters: params);
+        return APIHelper().httpErrorHandle(response: response);
+      } on DioException catch (e) {
+        if (e.response == null) return;
+        return APIHelper().httpErrorHandle(response: e.response);
       }
     }
   }

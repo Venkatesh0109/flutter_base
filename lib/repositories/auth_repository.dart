@@ -1,46 +1,70 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_base/constants/keys.dart';
+import 'package:flutter_base/models/response.dart';
+import 'package:flutter_base/models/user.dart';
 import 'package:flutter_base/providers/providers.dart';
 import 'package:flutter_base/services/api/api_services.dart';
+import 'package:flutter_base/services/route/router.dart';
+import 'package:flutter_base/services/route/routes.dart';
+import 'package:flutter_base/utilities/extensions/response_extension.dart';
+import 'package:flutter_base/utilities/message.dart';
 
-/// AuthRepository contains authentication related functionalities
 class AuthRepository {
-  /// Initialize the [APIService]
-  APIService api = APIService();
+  String prefix = 'auth';
+  APIService get _api => APIService(prefixUrl: prefix);
 
-  /// Performs a login API call.\
-  /// The returned [Future] resolves to the status by API response.\
-  /// The `email` and `password` fields are required.
-  Future<bool> login(BuildContext context,
-      {required String email, required String password}) async {
-    /// Turning on the loading
+  Future<bool> login(BuildContext context, Map<String, dynamic> params) async {
     authProvider.isLoading = true;
-
-    /// Store a api response body as a Map
-    Map responseBody = await api
-        .post(context, "login", body: {"email": email, "password": password});
-
-    /// Checks if response body has any errors from backend
-    if (api.hasError(responseBody)) {
-      /// Turning off the loading
-      authProvider.isLoading = false;
-
-      /// Reutns the function with failed status(false)
-      return false;
-    }
-
-    /// Saves the data
-    await save(responseBody);
-
-    /// Turning off the loading
+    ResponseData responseData = await _api.post(context, 'login', body: params);
     authProvider.isLoading = false;
-
-    /// Reutns the function with success status(true)
+    if (responseData.hasError) return false;
+    saveCredentials(responseData.data);
+    navigateHome(context);
     return true;
   }
 
-  /// Saves the credentials(i.e Token) to the local storage
-  Future<void> save(Map data) async {
-    /// Data saving logic
+  Future<bool> register(
+      BuildContext context, Map<String, dynamic> params) async {
+    authProvider.isLoading = true;
+    ResponseData responseData =
+        await APIService().post(context, 'users/register', body: params);
+    authProvider.isLoading = false;
+    if (responseData.hasError) return false;
+    saveCredentials(responseData.data);
+    navigateHome(context);
+    return true;
+  }
+
+  Future<bool> logout(BuildContext context) async {
+    authProvider.isLoading = true;
+    await Future.delayed(const Duration(milliseconds: 500));
+    navigateLogin(context);
+    clearCredentials();
+    // String message=
+    showMessage('Logout successfully');
+    authProvider.isLoading = false;
+    return true;
+  }
+
+  void saveCredentials(Map data) {
+    authProvider.accessToken = data['token'] ?? "";
+    authProvider.user = User.fromJson(data['data'] ?? {});
+  }
+
+  void clearCredentials() {
+    authProvider.accessToken = "";
+    authProvider.user = null;
+    securedStorage.deleteAll();
+  }
+
+  void navigateHome(BuildContext context) {
+    isLoggedIn = true;
+    context.go(Routes.home);
+  }
+
+  void navigateLogin(BuildContext context) {
+    isLoggedIn = false;
+    context.go(Routes.login);
   }
 }

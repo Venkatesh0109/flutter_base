@@ -1,181 +1,215 @@
-import 'package:flutter_base/constants/keys.dart';
-import 'package:flutter_base/theme/palette.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_base/constants/size_unit.dart';
 
-class TextFormFieldCustom extends StatelessWidget {
-  /// Controls the text being edited.
+import 'package:flutter_base/theme/palette.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_base/theme/theme_guide.dart';
+import 'package:flutter_base/utilities/extensions/string_extenstion.dart';
+
+class TextFormFieldCustom extends StatefulWidget {
   final TextEditingController controller;
 
-  /// A Text that describes the input field.
-  final String label;
-
-  /// The type of information for which to optimize the text input control.
+  final String? label, hint;
   final TextInputType? keyboardType;
-
-  /// The isOptional specifies the input [TextFormField] is optional or required
   final bool isOptional;
-
-  /// Enable or disable the [TextFormField]
   final bool? enabled;
-
-  /// Validates the input with custom logic
+  final bool isCaptalizeAll, obscured;
+  final Widget? suffix, prefix;
   final String? Function(String? input)? validator;
+  final BorderRadius? borderRadius;
+  final Function(String)? onChanged;
+  final VoidCallback? onTap;
+  final bool isBorderLess;
+  final int? maxLength;
 
-  /// Creates a customized [FormField] that contains a [TextField].
   const TextFormFieldCustom({
     super.key,
     required this.controller,
-    required this.label,
+    this.label,
     this.keyboardType,
     this.isOptional = false,
     this.enabled,
     this.validator,
+    this.isCaptalizeAll = false,
+    this.obscured = false,
+    this.suffix,
+    required this.hint,
+    this.prefix,
+    this.borderRadius,
+    this.onChanged,
+    this.onTap,
+    this.isBorderLess = true,
+    this.maxLength,
   });
 
   @override
+  State<TextFormFieldCustom> createState() => _TextFormFieldCustomState();
+}
+
+class _TextFormFieldCustomState extends State<TextFormFieldCustom> {
+  bool isVisible = false;
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      enabled: enabled,
-      validator: (input) {
+      controller: widget.controller,
+      keyboardType: widget.keyboardType,
+      enabled: widget.enabled,
+      readOnly: widget.onTap != null,
+      onTap: widget.onTap,
+      maxLength: widget.maxLength,
+      inputFormatters: getInputFormatters,
+      onTapOutside: (event) => FocusScope.of(context).unfocus(),
+      obscureText: widget.obscured && !isVisible,
+      onChanged: widget.onChanged,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: (i) {
+        String input = i ?? '';
         // Checks if the field is optional and input is empty
-        if (!isOptional && (input == null || input.isEmpty)) {
-          return "The $label is required";
+        if (!widget.isOptional && input.isEmpty) {
+          return "The ${widget.label} is required";
+        }
+        if (!widget.isOptional &&
+            widget.keyboardType == TextInputType.emailAddress &&
+            !input.isEmail) {
+          return "Kindly enter valid mail";
+        }
+        if (!widget.isOptional &&
+            widget.maxLength != null &&
+            input.length != widget.maxLength) {
+          return '${widget.label} must be ${widget.maxLength} digit';
         }
         // If the validator is not null custom validation logic to be performed
-        if (validator != null) {
-          return validator!(input);
+        if (widget.validator != null) {
+          return widget.validator!(input);
         }
         // No validation errors
         return null;
       },
       decoration: InputDecoration(
+          prefixIcon: widget.prefix,
+          suffixIcon: suffix,
+          errorStyle: const TextStyle(fontSize: 13, color: Palette.red),
+          counterText: '',
           filled: true,
           fillColor: Colors.white,
           labelStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-          labelText: label,
-          contentPadding: const EdgeInsets.all(12),
-          border: OutlineInputBorder(
-              borderSide: const BorderSide(color: Palette.primary),
-              borderRadius: BorderRadius.circular(10)),
-          errorBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Palette.danger),
-              borderRadius: BorderRadius.circular(10)),
-          enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Palette.muted),
-              borderRadius: BorderRadius.circular(10)),
-          focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Palette.primary),
-              borderRadius: BorderRadius.circular(10))),
+          hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+          labelText: widget.label,
+          hintText: widget.hint,
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: SizeUnit.lg, vertical: SizeUnit.lg),
+          border: ThemeGuide.focussedBorder,
+          errorBorder: ThemeGuide.errorBorder,
+          enabledBorder:
+              ThemeGuide.defaultBorder(color: Palette.grey.withOpacity(.5)),
+          focusedBorder: ThemeGuide.focussedBorder),
+    );
+  }
+
+  Widget? get suffix {
+    return widget.obscured
+        ? InkWell(
+            onTap: () {
+              isVisible = !isVisible;
+              setState(() {});
+            },
+            child: !isVisible
+                ? const Icon(
+                    Icons.visibility_off_outlined,
+                    size: 18,
+                  )
+                : const Icon(
+                    Icons.visibility_outlined,
+                    size: 18,
+                  ),
+          )
+        : widget.suffix;
+  }
+
+  List<TextInputFormatter> get getInputFormatters {
+    if (widget.keyboardType == TextInputType.number ||
+        widget.keyboardType == const TextInputType.numberWithOptions()) {
+      return [FilteringTextInputFormatter.digitsOnly];
+    }
+    if (widget.isCaptalizeAll) {
+      return [UpperCaseTextFormatter()];
+    }
+    if (widget.keyboardType == TextInputType.emailAddress) {
+      return [LowerCaseTextFormatter()];
+    }
+    return <TextInputFormatter>[];
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
     );
   }
 }
 
-class TextFieldAuth extends StatelessWidget {
-  /// Controls the text being edited.
+class LowerCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text.toLowerCase(),
+      selection: newValue.selection,
+    );
+  }
+}
+
+class FeedbackTextfield extends StatelessWidget {
   final TextEditingController controller;
-
-  /// An icon that appears before the [prefix] or [prefixText] and before the editable part of the text field, within the decoration's container.
-  ///
-  /// Typically a `[IconData]`
-  final IconData? prefix;
-
-  /// Text that suggests what sort of input the field accepts.
   final String? hint;
-
-  /// Show or hide the text specifically used on password fields.
-  final bool obscured;
-
-  /// Automatically opens keyboard when the [TextFieldAuth] is shown.
-  final bool autoFoucs;
-
-  /// An icon that appears after the editable part of the text field and after the [suffix] or [suffixText], within the decoration's container.
-  final Widget? suffix;
-
-  /// The type of information for which to optimize the text input control.
+  final double? height;
   final TextInputType? textInputType;
-
-  /// A Text that describes the input field.
-  final String label;
-
-  /// Validates the input with custom logic
-  final String? Function(String? input)? validator;
-
-  /// The maximum allowed characters length of [TextFieldAuth]
-  final int? length;
-
-  /// Creates a customized [FormField] that contains a [TextField]. Specifiaclly used for authentications
-  const TextFieldAuth(
+  const FeedbackTextfield(
       {super.key,
       required this.controller,
-      this.prefix,
       this.hint,
-      required this.obscured,
-      this.suffix,
-      this.textInputType = TextInputType.emailAddress,
-      this.autoFoucs = false,
-      required this.label,
-      this.validator,
-      this.length});
+      this.textInputType,
+      this.height});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Theme(
-          data: ThemeData(
-              colorScheme: Theme.of(mainKey.currentContext!)
-                  .colorScheme
-                  .copyWith(onSurface: Palette.primary)),
-          child: TextFormField(
-            controller: controller,
-            autofocus: autoFoucs,
-            keyboardType: textInputType,
-            obscureText: obscured,
-            validator: (input) {
-              // Checks if the input is empty
-              if (input == null || input.isEmpty) {
-                return "The $label is required";
-              }
-              // If the validator is not null custom validation logic to be performed
-              if (validator != null) {
-                return validator!(input);
-              }
-              // No validation errors
-              return null;
-            },
-            maxLength: length,
-            decoration: InputDecoration(
-                labelText: label,
-                contentPadding: const EdgeInsets.all(10),
-                fillColor: Colors.white,
-                prefixIcon: Icon(
-                  prefix ?? CupertinoIcons.at,
-                ),
-                suffixIcon: suffix,
-                filled: true,
-                counterText: "",
-                hintText: hint,
-                labelStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-                hintStyle: TextStyle(color: Palette.muted),
-                border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Palette.primary),
-                    borderRadius: BorderRadius.circular(10)),
-                errorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Palette.danger),
-                    borderRadius: BorderRadius.circular(10)),
-                enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Palette.muted),
-                    borderRadius: BorderRadius.circular(10)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Palette.primary),
-                    borderRadius: BorderRadius.circular(10))),
-          ),
-        ),
-      ],
-    );
+    return Container(
+        height: height ?? 150,
+        decoration: const BoxDecoration(color: Palette.pureWhite),
+        child: TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.multiline,
+          maxLines: 10,
+          obscureText: false,
+          cursorColor: Palette.primary,
+          style: const TextStyle(),
+          decoration: InputDecoration(
+              fillColor: Palette.pureWhite,
+              filled: false,
+              counterText: "",
+              hintText: hint,
+              contentPadding: const EdgeInsets.all(12),
+              hintStyle:
+                  TextStyle(fontSize: 12, color: Palette.grey.withOpacity(0.8)),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Palette.primary)),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: Colors.grey.withOpacity(.3)))),
+        ));
+  }
+}
+
+class DoubleTextField extends StatelessWidget {
+  const DoubleTextField({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }

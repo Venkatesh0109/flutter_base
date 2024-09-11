@@ -1,33 +1,66 @@
 import 'package:flutter_base/theme/palette.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_base/theme/theme_guide.dart';
 
 ThemeData lightTheme = ThemeData(
   useMaterial3: true,
-  fontFamily: "Poppins",
+  fontFamily: "Mulish",
   brightness: Brightness.light,
   primaryColor: Palette.primary,
-  scaffoldBackgroundColor: Palette.light,
-  appBarTheme: const AppBarTheme(backgroundColor: Palette.light),
+  scaffoldBackgroundColor: Palette.pureWhite,
+  appBarTheme: const AppBarTheme(
+      foregroundColor: Palette.pureWhite,
+      backgroundColor: Palette.primary,
+      titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+  iconButtonTheme: IconButtonThemeData(
+      style: ButtonStyle(
+    minimumSize: WidgetStateProperty.all(const Size(45, 45)),
+    padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+    iconSize: const WidgetStatePropertyAll(30),
+    shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: ThemeGuide.borderRadius())),
+    foregroundColor: const WidgetStatePropertyAll(Palette.pureWhite),
+    // foregroundColor: const WidgetStatePropertyAll(Palette.secondary),
+  )),
+  chipTheme: const ChipThemeData(
+    // shape: RoundedRectangleBorder(borderRadius: ThemeGuide.borderRadius()),
+    side: BorderSide.none,
+  ),
+  datePickerTheme: DatePickerThemeData(
+      rangeSelectionBackgroundColor: Palette.primary.withOpacity(.5),
+      inputDecorationTheme: const InputDecorationTheme()),
   elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
-          shape: MaterialStateProperty.all(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-          foregroundColor: MaterialStateProperty.all(Colors.white),
-          backgroundColor: MaterialStateProperty.all(Palette.primary),
-          elevation: MaterialStateProperty.all(0))),
+          minimumSize: WidgetStateProperty.all(const Size(45, 45)),
+          shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(borderRadius: ThemeGuide.borderRadius())),
+          foregroundColor: WidgetStateProperty.all(Colors.white),
+          backgroundColor: WidgetStateProperty.all(Palette.primary),
+          elevation: WidgetStateProperty.all(0))),
+  outlinedButtonTheme: OutlinedButtonThemeData(
+      style: ButtonStyle(
+    minimumSize: WidgetStateProperty.all(const Size(45, 45)),
+    side: const WidgetStatePropertyAll(BorderSide(color: Palette.dark)),
+    foregroundColor: const WidgetStatePropertyAll(Palette.dark),
+    shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: ThemeGuide.borderRadius())),
+  )),
   filledButtonTheme: FilledButtonThemeData(
       style: ButtonStyle(
-    backgroundColor: const MaterialStatePropertyAll(Palette.secondary),
-    shape: MaterialStateProperty.all(
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+    backgroundColor: const WidgetStatePropertyAll(Palette.secondary),
+    shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: ThemeGuide.borderRadius())),
   )),
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
       elevation: 0, backgroundColor: Palette.primary),
   textButtonTheme: TextButtonThemeData(
       style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.all(Palette.primary),
+          textStyle: const WidgetStatePropertyAll(
+              TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          padding: WidgetStateProperty.all(EdgeInsets.zero),
+          foregroundColor: WidgetStateProperty.all(Palette.primary),
           overlayColor:
-              MaterialStateProperty.all(Palette.primary.withOpacity(.1)))),
+              WidgetStateProperty.all(Palette.secondary.withOpacity(.1)))),
   canvasColor: Palette.light,
   colorScheme: const ColorScheme(
       brightness: Brightness.light,
@@ -35,65 +68,9 @@ ThemeData lightTheme = ThemeData(
       onPrimary: Colors.white,
       secondary: Palette.secondary,
       onSecondary: Palette.dark,
-      error: Palette.danger,
+      error: Palette.red,
       onError: Colors.white,
-      background: Palette.light,
-      onBackground: Palette.dark,
       surface: Palette.light,
       onSurface: Palette.dark),
   dialogBackgroundColor: Colors.white,
 );
-
-ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    fontFamily: "Poppins",
-    brightness: Brightness.dark,
-    primaryColor: Palette.primary,
-    scaffoldBackgroundColor: Palette.dark,
-    appBarTheme: const AppBarTheme(backgroundColor: Palette.dark),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-            shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10))),
-            foregroundColor: MaterialStateProperty.all(Colors.white),
-            backgroundColor: MaterialStateProperty.all(Palette.primary),
-            elevation: MaterialStateProperty.all(0))),
-    filledButtonTheme: FilledButtonThemeData(
-        style: ButtonStyle(
-      shape: MaterialStateProperty.all(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-    )),
-    textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all(Palette.primary),
-            overlayColor:
-                MaterialStateProperty.all(Palette.primary.withOpacity(.1)))),
-    floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        elevation: 0, backgroundColor: Palette.primary),
-    dialogBackgroundColor: Palette.dark,
-    dropdownMenuTheme: DropdownMenuThemeData(
-        inputDecorationTheme: InputDecorationTheme(
-            contentPadding: const EdgeInsets.all(12),
-            border: OutlineInputBorder(
-                borderSide: const BorderSide(color: Palette.primary),
-                borderRadius: BorderRadius.circular(10)),
-            errorBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Palette.danger),
-                borderRadius: BorderRadius.circular(10)),
-            enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Palette.muted),
-                borderRadius: BorderRadius.circular(10)),
-            focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Palette.primary),
-                borderRadius: BorderRadius.circular(10))))
-    // elevatedButtonTheme: ElevatedButtonThemeData(
-    //     style: ButtonStyle(
-    //         padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-    //             EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0)),
-    //         shape: MaterialStateProperty.all<OutlinedBorder>(
-    //             RoundedRectangleBorder(
-    //                 borderRadius: BorderRadius.circular(20.0))),
-    //         backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-    //         foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-    //         overlayColor: MaterialStateProperty.all<Color>(Colors.black26))),
-    );

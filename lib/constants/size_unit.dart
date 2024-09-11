@@ -5,7 +5,7 @@
 /// * `lg`  16pt.
 /// * `xlg` 24pt.
 ///
-/// * `borderRadius` 8pt.
+/// * `borderRadius` 12pt.
 ///
 /// Usage
 ///
@@ -15,7 +15,7 @@
 /// )
 /// ```
 class SizeUnit {
-  static const double borderRadius = 8.0;
+  static const double borderRadius = 8;
 
   /// The default unit of spacing
   static const double _spaceUnit = 16;

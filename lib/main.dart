@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_base/constants/app_strings.dart';
+import 'package:flutter_base/providers/info_provider.dart';
 import 'package:flutter_base/providers/providers.dart';
 import 'package:provider/provider.dart';
-
+import 'package:flutter_base/utilities/custom_date_time.dart';
+import 'package:flutter_base/view/no_internet.dart';
 import 'constants/keys.dart';
-import 'services/route/app_route.dart';
+import 'services/route/router.dart';
 import 'theme/theme_constants.dart';
 import 'theme/theme_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  runApp(MultiProvider(providers: providers, child: const MyApp()));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then(
+      (_) => runApp(MultiProvider(providers: providers, child: const MyApp())));
+  CustomDateTime().getOffSet();
 }
 
 class MyApp extends StatefulWidget {
@@ -20,19 +25,24 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeManager>(
-      builder: (context, themeManager, child) {
+    return Consumer2<ThemeManager, InfoProvider>(
+      builder: (context, themeManager, info, child) {
         return MaterialApp.router(
           key: mainKey,
+          builder: (BuildContext context, Widget? child) => Stack(children: [
+            if (child != null) child,
+            if (!info.isHadInternet) const NoInternetScreen(),
+          ]),
           debugShowCheckedModeBanner: false,
-          title: 'Flutter Base',
+          title: AppStrings.appName,
           theme: lightTheme,
-          darkTheme: darkTheme,
+          // darkTheme: darkTheme,
           themeMode: themeManager.themeMode,
           routerConfig: router,
+          scaffoldMessengerKey: snackbarKey,
         );
       },
     );
