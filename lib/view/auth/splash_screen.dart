@@ -1,3 +1,4 @@
+// ignore_for_file: use_build_context_synchronously
 import 'dart:convert';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,6 @@ import 'package:flutter_base/constants/assets/local_images.dart';
 import 'package:flutter_base/constants/keys.dart';
 import 'package:flutter_base/models/user.dart';
 import 'package:flutter_base/providers/providers.dart';
-import 'package:flutter_base/repositories/auth_repository.dart';
 import 'package:flutter_base/services/route/router.dart';
 import 'package:flutter_base/services/route/routes.dart';
 import 'package:flutter_base/services/storage/storage_constants.dart';
@@ -25,7 +25,9 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((e) => init());
+    WidgetsBinding.instance.addPostFrameCallback((e) {
+      init();
+    });
     super.initState();
   }
 
@@ -38,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (user != null) {
       authProvider.user = User.fromJson(jsonDecode(user));
       authProvider.accessToken = accessToken;
-      AuthRepository().navigateHome(context);
+      // AuthRepository().navigateHome(context);
       return;
     }
     context.go(Routes.login);

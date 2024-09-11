@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_base/services/route/route_transition.dart';
+import 'package:flutter_base/view/auth/login_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_base/view/auth/splash_screen.dart';
 import 'package:flutter_base/view/main_screen.dart';
@@ -21,18 +22,17 @@ final GoRouter router = GoRouter(
         return NoTransitionPage(child: MainScreen(child: child));
       },
       routes: [
-        // customShellRoute(path: Routes.home, child: const HomeScreen()),
+        customShellRoute(path: Routes.login, child: const LoginScreen()),
         // customShellRoute(
         //     path: Routes.resources, child: const ResourcesScreen()),
         // customShellRoute(path: Routes.training, child: const TrainingScreen()),
-        // customShellRoute(path: Routes.profile, child: const ProfileScreen()),
+        // customShellRo
+        //ute(path: Routes.profile, child: const ProfileScreen()),
       ],
     ),
 
     ///Splash
     customRoute(path: Routes.splash, child: const SplashScreen()),
-
-   
   ],
   redirect: (context, state) {
     String path = state.uri.path;

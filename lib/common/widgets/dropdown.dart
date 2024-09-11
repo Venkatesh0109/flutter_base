@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_base/common/widgets/text.dart';
 import 'package:flutter_base/constants/size_unit.dart';
 import 'package:flutter_base/theme/palette.dart';
 import 'package:flutter_base/theme/theme_guide.dart';
@@ -56,4 +57,66 @@ class DropDownCustom<T> extends DropdownButtonFormField<T> {
               focusedBorder:
                   isNoBorder ? InputBorder.none : ThemeGuide.focussedBorder),
         );
+}
+
+Widget dropdownButton(
+    var value, String hint, List list, String key, Function(Object?)? onChanged,
+    {bool isDisabled = false, height}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        decoration: BoxDecoration(
+            color: Palette.pureWhite,
+            borderRadius: const BorderRadius.all(Radius.circular(100)),
+            border: Border.all(color: Colors.grey.withOpacity(.3))),
+        height: height ?? 44,
+        child: DropdownButtonFormField(
+            isExpanded: true,
+            value: value,
+            focusColor: Palette.grey,
+            decoration: InputDecoration(
+                filled: false,
+                counterText: "",
+                hintText: hint,
+                contentPadding: const EdgeInsets.only(left: 16),
+                errorStyle: const TextStyle(fontSize: 13),
+                hintStyle: TextStyle(
+                    // height: list.isEmpty ? 3.5 : null,
+                    height: hint.isNotEmpty ? 3.5 : null,
+                    fontSize: 13,
+                    color: Palette.grey.withOpacity(.8),
+                    fontWeight: FontWeight.w400),
+                enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.transparent),
+                    borderRadius: BorderRadius.all(Radius.circular(8))),
+                disabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.transparent),
+                    borderRadius: BorderRadius.all(Radius.circular(8))),
+                focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.transparent)),
+                border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                    borderSide:
+                        BorderSide(width: .5, color: Colors.transparent)),
+                fillColor: Palette.pureWhite,
+                suffixIcon: const Icon(Icons.expand_more, color: Palette.grey)),
+            iconDisabledColor: Palette.pureWhite,
+            iconEnabledColor: Palette.pureWhite,
+            items: list.map((items) {
+              return DropdownMenuItem(
+                  value: items,
+                  enabled: !isDisabled,
+                  child: TextCustom(
+                    '${items[key] ?? ''}',
+                    color: isDisabled ? Palette.dark : null,
+                    size: 14,
+                    fontWeight: FontWeight.w400,
+                  ));
+            }).toList(),
+            onChanged: onChanged),
+      ),
+      const SizedBox(height: 10),
+    ],
+  );
 }

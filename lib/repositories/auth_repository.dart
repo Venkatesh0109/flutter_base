@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_base/constants/keys.dart';
@@ -20,6 +22,8 @@ class AuthRepository {
     authProvider.isLoading = false;
     if (responseData.hasError) return false;
     saveCredentials(responseData.data);
+    // ignore: duplicate_ignore
+    // ignore: use_build_context_synchronously
     navigateHome(context);
     return true;
   }

@@ -1,3 +1,4 @@
+// ignore: depend_on_referenced_packages
 import 'package:dio/dio.dart';
 import 'package:flutter_base/constants/keys.dart';
 
